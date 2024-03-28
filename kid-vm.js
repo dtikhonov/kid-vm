@@ -20,6 +20,11 @@ const ops = {
         else
             err("tried to read input, but ran out of input elements!");
     },
+    has_input() {
+        const inputs = document.getElementById('input').value.trim()
+                                                        .split(/\s+/);
+        stack.push(0 + (inputIdx < inputs.length));
+    },
     push(args) {
         stack.push(...args);
     },
@@ -42,24 +47,64 @@ const ops = {
         const a = Number(stack.pop()), b = Number(stack.pop());
         stack.push(a / b);
     },
-    mod(args) {
-        const [divisor] = args;
-        const dividend = Number(stack.pop());
-        stack.push( dividend % Number(divisor) );
+    mod() {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( Number(b) % Number(a) );
     },
     swap() {
         const a = stack.pop(), b = stack.pop();
         stack.push(a, b);
+    },
+    stacksize() {
+        stack.push( stack.length );
+    },
+    lt(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( 0 + (Number(b) < Number(a)) );
+    },
+    gt(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( 0 + (Number(b) > Number(a)) );
+    },
+    le(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( 0 + (Number(b) <= Number(a)) );
+    },
+    ge(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( 0 + (Number(b) >= Number(a)) );
+    },
+    eq(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( 0 + (Number(b) === Number(a)) );
+    },
+    streq(args) {
+        const a = stack.pop(), b = stack.pop();
+        stack.push( '' + a === '' + b );
+    },
+    jump(args) {
+        const [label] = args;
+        if (label in labels)
+            programCounter = labels[label];
+        else
+            /* TODO This should really be a compile-time error as well */
+            err(`label ${label} does not exist`);
+    },
+    if_then(args) {
+        const a = stack.pop();
+        if (Number(a))
+            ops.jump(args);
     },
     print() {
         console.log( stack[stack.length - 1] );
     },
 };
 
-for (const name of ['pop', 'print', 'mod'])
+for (const name of ['pop', 'print', 'if_then'])
     ops[name].minStackSize = 1;
 
-for (const name of ['add', 'mul', 'sub', 'div', 'swap'])
+for (const name of ['add', 'mul', 'sub', 'div', 'swap', 'gt', 'ge', 'lt',
+                    'le', 'eq', 'streq', 'mod'])
     ops[name].minStackSize = 2;
 
 const rightArrow = ' -> ';
@@ -99,7 +144,7 @@ function parseProgram()
             .replace(/\s+$/, '')        // Trailing whitespace
         ;
         const tokens = trimmed.split(/\s+/);
-        const opName = tokens.shift().toLowerCase();
+        const opName = tokens.shift().toLowerCase().replaceAll(/-/g, '_');
         if (opName === 'label')
         {
             let labelName;
