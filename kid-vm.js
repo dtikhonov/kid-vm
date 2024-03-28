@@ -176,7 +176,14 @@ function parseProgram()
                 line,
             });
         else
+        {
+            program.push({
+                opFun: noop,
+                args: [],
+                line: '** ERROR **  ' + line,
+            });
             err(`Cannot parse line number ${i+1}: ${line}`);
+        }
     }
     displayProgram();
     updateStackDisplay();
