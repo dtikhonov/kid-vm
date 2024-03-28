@@ -12,7 +12,14 @@
 <script src=kid-vm.js></script>
 </head>
 <body>
+<h2>Some Programs to Try</h2>
+<a href='' onclick="loadProgram('addTwoNumbers');return false;">Add two numbers</a>,
+<a href='' onclick="loadProgram('divideByTwo');return false;">Divide a number by two</a>
 <h2>Stack-Based Virtual Machine</h2>
+INPUT: <input type=text id=input size=100>
+<p>
+PROGRAM:
+<br>
 <textarea id="programText" rows="10" cols="50">
 PUSH 5
 PUSH 6
@@ -26,5 +33,38 @@ PRINT
 <button onclick="startAgain()">Start From Beginning</button>
 <button onclick="stepProgram()">Step</button>
 <div id="stackDisplay"></div>
+
+<script>
+const programsToTry = {
+    addTwoNumbers: {
+        input: "1 2",
+        programText: `
+READ    ; read in a number from input
+READ    ; read in another one
+ADD     ; add the two numbers together
+`.trim(),
+    },
+    divideByTwo: {
+        input: "7",
+        programText: `
+PUSH 2  ; 2 is the divisor
+READ    ; read the divident from input
+DIV     ; divide the number by two
+`.trim(),
+    },
+};
+
+function loadProgram(progName) {
+    if (progName in programsToTry)
+    {
+        for (const [name, value] of Object.entries(programsToTry[progName]))
+            document.getElementById(name).value = value;
+        parseProgram();
+    }
+    else
+        alert(`program ${progName} is unavailable!`);
+}
+</script>
+
 </body>
 </html>

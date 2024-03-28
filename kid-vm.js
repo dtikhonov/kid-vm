@@ -8,8 +8,18 @@ const program = [];
 let labels = {};
 let programCounter = 0;
 let errorFound = false;
+let inputIdx = 0;
 
 const ops = {
+    read() {
+        /* Read from input area left to right */
+        const inputs = document.getElementById('input').value.trim()
+                                                        .split(/\s+/);
+        if (inputIdx < inputs.length)
+            stack.push(inputs[ inputIdx++ ]);
+        else
+            err("tried to read input, but ran out of input elements!");
+    },
     push(args) {
         stack.push(...args);
     },
@@ -48,7 +58,7 @@ for (const name of ['add', 'mul', 'sub', 'div', 'swap'])
     ops[name].minStackSize = 2;
 
 const rightArrow = ' -> ';
-const rightArrowRe = new RegExp('^' + rightArrow);
+const rightArrowRe = /^\s*-> /;
 
 function err(reason)
 {
@@ -61,6 +71,7 @@ function resetRunState()
     stack.length = 0;
     programCounter = 0;
     errorFound = false;
+    inputIdx = 0;
 }
 
 function parseProgram()
@@ -70,10 +81,8 @@ function parseProgram()
     program.length = 0; labels = {}; // Drop compiled program
     resetRunState();
 
-    const input = document.getElementById("programText").value;
+    const input = document.getElementById("programText").value.trim();
     const lines = input.split('\n');
-    if (lines[ lines.length - 1 ] === '')
-        lines.pop();
     for (let [i, line] of lines.entries())
     {
         line = line
