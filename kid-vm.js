@@ -179,6 +179,7 @@ function parseProgram()
             err(`Cannot parse line number ${i+1}: ${line}`);
     }
     displayProgram();
+    updateStackDisplay();
 }
 
 /* Display the program together with program counter: */
