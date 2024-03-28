@@ -42,6 +42,11 @@ const ops = {
         const a = Number(stack.pop()), b = Number(stack.pop());
         stack.push(a / b);
     },
+    mod(args) {
+        const [divisor] = args;
+        const dividend = Number(stack.pop());
+        stack.push( dividend % Number(divisor) );
+    },
     swap() {
         const a = stack.pop(), b = stack.pop();
         stack.push(a, b);
@@ -51,7 +56,7 @@ const ops = {
     },
 };
 
-for (const name of ['pop', 'print'])
+for (const name of ['pop', 'print', 'mod'])
     ops[name].minStackSize = 1;
 
 for (const name of ['add', 'mul', 'sub', 'div', 'swap'])
