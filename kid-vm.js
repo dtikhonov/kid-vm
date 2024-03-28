@@ -139,28 +139,21 @@ function displayProgram()
     document.getElementById("programText").value = text;
 }
 
+function runOneOp()
+{
+    const prog = program[programCounter++];
+    if (!prog.opFun.minStackSize || stack.length >= prog.opFun.minStackSize)
+        prog.opFun( prog.args );
+    else
+        err("not enough elements on the stack, must have at least"
+                                                + prog.opFun.minStackSize);
+}
+
 function runProgram()
 {
     resetRunState();
     while (programCounter < program.length && !errorFound)
-    {
-        const prog = program[programCounter++];
-        if (!prog.opFun.minStackSize || stack.length >= prog.opFun.minStackSize)
-            prog.opFun( prog.args );
-        else
-        {
-            err("not enough elements on the stack, must have at least"
-                                                    + prog.opFun.minStackSize);
-            break;
-        }
-    }
-    displayProgram();
-    updateStackDisplay();
-}
-
-function startAgain()
-{
-    resetRunState();
+        runOneOp();
     displayProgram();
     updateStackDisplay();
 }
@@ -169,13 +162,15 @@ function stepProgram()
 {
     if (programCounter < program.length && !errorFound)
     {
-        const prog = program[programCounter++];
-        if (!prog.opFun.minStackSize || stack.length >= prog.opFun.minStackSize)
-            prog.opFun( prog.args );
-        else
-            err("not enough elements on the stack, must have at least"
-                                                    + prog.opFun.minStackSize);
+        runOneOp()
+        displayProgram();
+        updateStackDisplay();
     }
+}
+
+function startAgain()
+{
+    resetRunState();
     displayProgram();
     updateStackDisplay();
 }
