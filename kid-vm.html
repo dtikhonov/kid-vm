@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stack VM</title>
+<style>
+  body { font-family: Arial, sans-serif; }
+  #stackDisplay { margin-top: 10px; }
+  .stack-item { margin: 5px; padding: 5px; background-color: #f0f0f0; border: 1px solid #ddd; }
+</style>
+<script src=kid-vm.js></script>
+</head>
+<body>
+<h2>Stack-Based Virtual Machine</h2>
+<textarea id="programText" rows="10" cols="50">
+PUSH 5
+PUSH 6
+SWAP
+ADD
+PRINT
+</textarea>
+<br>
+<button onclick="parseProgram()">Parse Program</button>
+<button onclick="runProgram()">Run Program</button>
+<button onclick="startAgain()">Start From Beginning</button>
+<button onclick="stepProgram()">Step</button>
+<div id="stackDisplay"></div>
+</body>
+</html>
