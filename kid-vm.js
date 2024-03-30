@@ -82,6 +82,9 @@ const ops = {
         const a = stack.pop(), b = stack.pop();
         stack.push( '' + a === '' + b );
     },
+    dup() {
+        stack.push( stack[ stack.length - 1] );
+    },
     jump(args) {
         const [label] = args;
         if (label in labels)
@@ -100,7 +103,7 @@ const ops = {
     },
 };
 
-for (const name of ['pop', 'print', 'if_then'])
+for (const name of ['pop', 'print', 'if_then', 'dup'])
     ops[name].minStackSize = 1;
 
 for (const name of ['add', 'mul', 'sub', 'div', 'swap', 'gt', 'ge', 'lt',
@@ -252,4 +255,92 @@ function updateStackDisplay()
         element.textContent = item;
         display.appendChild(element);
     }
+}
+
+const programsToTry = {
+    pushAndAddTwoNumbers: {
+        input: "1 2",
+        programText: `
+PUSH 5
+PUSH 6
+ADD
+PRINT           ; prints to JavaScript console
+`.trim(),
+        expect: [11],
+    },
+    addTwoNumbers: {
+        input: "1 2",
+        programText: `
+READ    ; read in a number from input
+READ    ; read in another one
+ADD     ; add the two numbers together
+`.trim(),
+        expect: [3],
+    },
+    divideByTwo: {
+        input: "7",
+        programText: `
+PUSH 2  ; 2 is the divisor
+READ    ; read the divident from input
+DIV     ; divide the number by two
+`.trim(),
+        expect: [3.5],
+    },
+    countOddNumbers: {
+        input: "1 2 3 4 5 6 7 8 9 10 11 42",
+        programText: `
+PUSH 0                      ; initialize count of odd values
+LABEL read-input
+HAS-INPUT                   ; push 1 if has input, 0 otherwise
+IF-THEN read-next-value     ; pop, jump on non-zero value
+JUMP end                    ; out of input
+LABEL read-next-value
+READ                        ; grab next value
+PUSH 2                      ; will do modulo 2
+MOD                         ; pop two values, push remainder
+ADD                         ; conveniently, we can use it as count
+JUMP read-input             ; go to beginning of the loop
+LABEl end
+`.trim(),
+        expect: [6],
+    },
+};
+
+function loadProgram(progName)
+{
+    if (progName in programsToTry)
+    {
+        for (const name of ['input', 'programText'])
+            document.getElementById(name).value = programsToTry[progName][name];
+        parseProgram();
+    }
+    else
+        alert(`program ${progName} is unavailable!`);
+}
+
+function runTests()
+{
+    for (const [name, spec] of Object.entries(programsToTry))
+    {
+        loadProgram(name);
+        parseProgram();
+        runProgram();
+        if (!arraysEqual(spec.expect, stack))
+        {
+            alert(`test ${name} failed, expected ${spec.expect}, got ${stack}`);
+            break;
+        }
+    }
+}
+
+function arraysEqual(a, b) {
+    if (a.length === b.length)
+    {
+        for (let i = 0; i < a.length; ++i)
+            if (a[i] !== b[i])
+                return false;
+        return true;
+    }
+    else
+        return true;
 }

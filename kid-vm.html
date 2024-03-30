@@ -17,6 +17,8 @@
 <a href='' onclick="loadProgram('addTwoNumbers');return false;">Add two numbers from input</a>,
 <a href='' onclick="loadProgram('divideByTwo');return false;">Divide a number by two</a>,
 <a href='' onclick="loadProgram('countOddNumbers');return false;">Count odd numbers</a>
+<p>
+<a href='' onclick="runTests();return false;">Run tests</a>
 <h2>Stack-Based Virtual Machine</h2>
 INPUT: <input type=text id=input size=100>
 <p>
@@ -33,66 +35,6 @@ PROGRAM:
 <p>
 STACK:<br>
 <div id="stackDisplay"></div>
-
-<script>
-const programsToTry = {
-    pushAndAddTwoNumbers: {
-        input: "1 2",
-        programText: `
-PUSH 5
-PUSH 6
-ADD
-PRINT           ; prints to JavaScript console
-`.trim(),
-    },
-    addTwoNumbers: {
-        input: "1 2",
-        programText: `
-READ    ; read in a number from input
-READ    ; read in another one
-ADD     ; add the two numbers together
-`.trim(),
-    },
-    divideByTwo: {
-        input: "7",
-        programText: `
-PUSH 2  ; 2 is the divisor
-READ    ; read the divident from input
-DIV     ; divide the number by two
-`.trim(),
-    },
-    countOddNumbers: {
-        input: "1 2 3 4 5 6 7 8 9 10 11 42",
-        programText: `
-PUSH 0                      ; initialize count of odd values
-LABEL read-input
-PUSH 1
-HAS-INPUT                   ; push 1 if has input, 0 otherwise
-EQ                          ; compare two top elements, 1 if equal
-IF-THEN read-next-value     ; pop, jump on non-zero value
-JUMP end                    ; out of input
-LABEL read-next-value
-READ                        ; grab next value
-PUSH 2                      ; will do modulo 2
-MOD                         ; pop two values, push remainder
-ADD                         ; conveniently, we can use it as count
-JUMP read-input             ; go to beginning of the loop
-LABEl end
-`.trim(),
-    },
-};
-
-function loadProgram(progName) {
-    if (progName in programsToTry)
-    {
-        for (const [name, value] of Object.entries(programsToTry[progName]))
-            document.getElementById(name).value = value;
-        parseProgram();
-    }
-    else
-        alert(`program ${progName} is unavailable!`);
-}
-</script>
 
 </body>
 </html>
