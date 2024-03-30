@@ -76,11 +76,10 @@ const ops = {
     },
     eq(args) {
         const a = stack.pop(), b = stack.pop();
-        stack.push( 0 + (Number(b) === Number(a)) );
-    },
-    streq(args) {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( '' + a === '' + b );
+        /* Using == instead of === makes this work for both strings and
+         * numbers, which is what we want.
+         */
+        stack.push( 0 + (a == b) );
     },
     dup() {
         stack.push( stack[ stack.length - 1] );
@@ -98,16 +97,36 @@ const ops = {
         if (Number(a))
             ops.jump(args);
     },
+    rrot() {
+        ops._rot('right')
+    },
+    lrot() {
+        ops._rot('left');
+    },
+    _rot(dir) {
+        const count = Number(stack.pop());
+        if (stack.length >= count)
+        {
+            const popped = stack.splice( stack.length - count );
+            if (dir === 'right')
+                popped.unshift( popped.pop() );
+            else
+                popped.push( popped.shift() );
+            stack.push(...popped);
+        }
+        else
+            err(`stack only has ${stack.length} elements, ${count} wanted`);
+    },
     print() {
         console.log( stack[stack.length - 1] );
     },
 };
 
-for (const name of ['pop', 'print', 'if_then', 'dup'])
+for (const name of ['pop', 'print', 'if_then', 'dup', 'rrot'])
     ops[name].minStackSize = 1;
 
 for (const name of ['add', 'mul', 'sub', 'div', 'swap', 'gt', 'ge', 'lt',
-                    'le', 'eq', 'streq', 'mod'])
+                    'le', 'eq', 'mod'])
     ops[name].minStackSize = 2;
 
 const rightArrow = ' -> ';
@@ -304,6 +323,34 @@ LABEl end
 `.trim(),
         expect: [6],
     },
+    rrotTest: {
+        programText: `
+    push 1
+    push 2
+    push 3
+    push 3
+    rrot
+`.trim(),
+        expect: [3, 1, 2],
+    },
+    lrotTest: {
+        programText: `
+    push 1
+    push 2
+    push 3
+    push 3
+    lrot
+`.trim(),
+        expect: [2, 3, 1],
+    },
+    eq: {
+        programText: `
+    push 1      ; string on the stack
+    stacksize   ; number on the stack
+    eq
+`.trim(),
+        expect: [1],
+    },
 };
 
 function loadProgram(progName)
@@ -311,7 +358,7 @@ function loadProgram(progName)
     if (progName in programsToTry)
     {
         for (const name of ['input', 'programText'])
-            document.getElementById(name).value = programsToTry[progName][name];
+            document.getElementById(name).value = programsToTry[progName][name] ?? '';
         parseProgram();
     }
     else
@@ -325,7 +372,9 @@ function runTests()
         loadProgram(name);
         parseProgram();
         runProgram();
-        if (!arraysEqual(spec.expect, stack))
+        if (arraysEqual(spec.expect, stack))
+            console.log(`test ${name} OK`);
+        else
         {
             alert(`test ${name} failed, expected ${spec.expect}, got ${stack}`);
             break;
@@ -337,7 +386,7 @@ function arraysEqual(a, b) {
     if (a.length === b.length)
     {
         for (let i = 0; i < a.length; ++i)
-            if (a[i] !== b[i])
+            if (a[i] != /* sic: not !== */ b[i])
                 return false;
         return true;
     }
