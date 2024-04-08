@@ -32,50 +32,50 @@ const ops = {
         return stack.pop();
     },
     mul() {
-        const a = Number(stack.pop()), b = Number(stack.pop());
+        const b = Number(stack.pop()), a = Number(stack.pop());
         stack.push(a * b);
     },
     add() {
-        const a = Number(stack.pop()), b = Number(stack.pop());
+        const b = Number(stack.pop()), a = Number(stack.pop());
         stack.push(a + b);
     },
     sub() {
-        const a = Number(stack.pop()), b = Number(stack.pop());
+        const b = Number(stack.pop()), a = Number(stack.pop());
         stack.push(a - b);
     },
     div() {
-        const a = Number(stack.pop()), b = Number(stack.pop());
+        const b = Number(stack.pop()), a = Number(stack.pop());
         stack.push(a / b);
     },
     mod() {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( Number(b) % Number(a) );
+        const b = stack.pop(), a = stack.pop();
+        stack.push( Number(a) % Number(b) );
     },
     swap() {
-        const a = stack.pop(), b = stack.pop();
-        stack.push(a, b);
+        const b = stack.pop(), a = stack.pop();
+        stack.push(b, a);
     },
     stacksize() {
         stack.push( stack.length );
     },
     lt(args) {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( 0 + (Number(b) < Number(a)) );
+        const b = stack.pop(), a = stack.pop();
+        stack.push( 0 + (Number(a) < Number(b)) );
     },
     gt(args) {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( 0 + (Number(b) > Number(a)) );
+        const b = stack.pop(), a = stack.pop();
+        stack.push( 0 + (Number(a) > Number(b)) );
     },
     le(args) {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( 0 + (Number(b) <= Number(a)) );
+        const b = stack.pop(), a = stack.pop();
+        stack.push( 0 + (Number(a) <= Number(b)) );
     },
     ge(args) {
-        const a = stack.pop(), b = stack.pop();
-        stack.push( 0 + (Number(b) >= Number(a)) );
+        const b = stack.pop(), a = stack.pop();
+        stack.push( 0 + (Number(b) >= Number(b)) );
     },
     eq(args) {
-        const a = stack.pop(), b = stack.pop();
+        const b = stack.pop(), a = stack.pop();
         /* Using == instead of === makes this work for both strings and
          * numbers, which is what we want.
          */
@@ -118,7 +118,8 @@ const ops = {
             err(`stack only has ${stack.length} elements, ${count} wanted`);
     },
     print() {
-        console.log( stack[stack.length - 1] );
+        const a = stack[ stack.length - 1 ];
+        document.getElementById('output').value += a + "\n";
     },
 };
 
@@ -140,6 +141,7 @@ function err(reason)
 
 function resetRunState()
 {
+    document.getElementById('output').value = '';
     stack.length = 0;
     programCounter = 0;
     errorFound = false;
@@ -283,7 +285,7 @@ const programsToTry = {
 PUSH 5
 PUSH 6
 ADD
-PRINT           ; prints to JavaScript console
+PRINT           ; prints top value of stack to output
 `.trim(),
         expect: [11],
     },
@@ -299,8 +301,8 @@ ADD     ; add the two numbers together
     divideByTwo: {
         input: "7",
         programText: `
-PUSH 2  ; 2 is the divisor
 READ    ; read the divident from input
+PUSH 2  ; 2 is the divisor
 DIV     ; divide the number by two
 `.trim(),
         expect: [3.5],
@@ -350,6 +352,42 @@ LABEl end
     eq
 `.trim(),
         expect: [1],
+    },
+    maxOfTwoNumbers: {
+        input: "2 3",
+        programText: `
+    ; find maximum of two numbers from input, leave result on stack
+    read
+    dup
+    read
+    dup    ; now have A A B B
+    push 3
+    rrot   ; now have A B A B
+    gt
+    if-then a-is-greater
+    swap
+    pop
+    jump end
+    label a-is-greater
+    pop
+    label end
+`.trim(),
+        expect: [3],
+    },
+    precedence1: {
+        input: '8 2 3',
+        programText: `
+    ; https://andreabergia.com/blog/2015/03/stack-based-virtual-machines-3/
+    ; Calculate (A + B * C) / 7
+    READ
+    READ
+    READ
+    MUL
+    ADD
+    PUSH 7
+    DIV
+`.trim(),
+        expect: [2],
     },
 };
 
