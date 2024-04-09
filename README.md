@@ -6,3 +6,5 @@ This implementation is to assist us running a STEM workshop for the Take Your Ki
 To Work Day, 2024.
 
 Try it [here](kid-vm.html)!
+
+See [list of operations](operations.md).
