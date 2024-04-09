@@ -389,6 +389,22 @@ LABEl end
 `.trim(),
         expect: [2],
     },
+    somef: {
+        input: '3 2 1',
+        programText: `
+    ; Read numbers A, B, and C from
+    ; input and calculate the value
+    ; of A * (B + C) / 3
+    READ    ; A
+    READ    ; B
+    READ    ; C
+    ADD
+    MUL
+    PUSH 3  ; Divide result by 3
+    DIV
+`.trim(),
+        expect: [3],
+    },
 };
 
 function loadProgram(progName)
